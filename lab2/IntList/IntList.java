@@ -61,6 +61,7 @@ public class IntList {
         if (argList.length == 0)
             return null;
         int[] restList = new int[argList.length - 1];
+        // What is the following doing?
         System.arraycopy(argList, 1, restList, 0, argList.length - 1);
         return new IntList(argList[0], IntList.of(restList));
     }
