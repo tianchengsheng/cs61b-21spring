@@ -113,14 +113,12 @@ public class LinkedListDeque<T> {
      * Must use iteration, not recursion
      */
     public T get(int index) {
-        if (index <= 0) {
-            throw new IllegalArgumentException("Invalid index number");
-        } else if (index > size) {
-            throw new IllegalArgumentException("Index out of range");
+        if (index < 0 || index > size) {
+            return null;
         }
 
         Node<T> currentNode = sentinel;
-        for (int i = 0; i < index; i++) {
+        for (int i = 0; i <= index; i++) {
             currentNode = currentNode.next;
         }
         return currentNode.data;
@@ -129,10 +127,8 @@ public class LinkedListDeque<T> {
     /** Same as get(), but use recursion */
     public T getRecursive(int index) {
         // TODO: Not sure how to do the recursion thing!
-        if (index <= 0) {
-            throw new IllegalArgumentException("Invalid index number");
-        } else if (index > size) {
-            throw new IllegalArgumentException("Index out of range");
+        if (index < 0 || index > size) {
+            return null;
         }
 
         Node<T> currentNode = sentinel.next;

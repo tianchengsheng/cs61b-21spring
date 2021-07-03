@@ -16,13 +16,11 @@ public class ArrayDeque<T> {
         capacity = 8;
         items = (T[]) new Object[capacity];
         size = 0;
-        first = 0;
-        last = 0;
     }
 
     /** Check if the deque has items  */
     public boolean isEmpty() {
-        return size > 0;
+        return size == 0;
     }
 
     /** Check if the deque is full  */
@@ -41,10 +39,13 @@ public class ArrayDeque<T> {
      */
     public void addFirst(T item) {
         if (isFull()) {
-            // TODO: Should do some resizing
+            resize();
         }
 
-        if (first == 0) {
+        if (isEmpty()) {
+            first = 0;
+            last = 0;
+        } else if (first == 0) {
             first = capacity - 1;
         } else {
             first -= 1;
@@ -56,10 +57,13 @@ public class ArrayDeque<T> {
     /** Add item at the last of deque */
     public void addLast(T item) {
         if (isFull()) {
-            // TODO:
+            resize();
         }
 
-        if (last == capacity - 1) {
+        if (isEmpty()) {
+            first = 0;
+            last = 0;
+        } else if (last == capacity - 1) {
             last = 0;
         } else {
             last += 1;
@@ -105,29 +109,48 @@ public class ArrayDeque<T> {
     }
 
     /** Resize method: should be very tricky */
-    // public void resize() {}
+    public void resize() {
+        int newCapacity = 2 * capacity;
+        T[] newItems = (T[]) new Object[newCapacity];
+
+        // Looping the number of size times
+        for (int i = 0; i < size; i++) {
+            newItems[(first + i) % newCapacity] = items[(first + i) % capacity];
+        }
+
+        last = (first + size - 1) % newCapacity;
+        capacity = newCapacity;
+        items = newItems;
+    }
+
 
     /** Print all items in deque  */
     public void printDeque() {
         int firstPos = first;
         int lastPos = last;
 
-        while (firstPos != lastPos) {  // TODO: Incorrect conditions
+        while (firstPos != lastPos) {
             System.out.print(items[firstPos] + " ");
+            if (firstPos == capacity - 1) {
+                firstPos = 0;
+            } else {
+                firstPos += 1;
+            }
         }
         System.out.print(items[firstPos]);
+        System.out.println();
     }
 
     /** Get the item at the specified index
      * Must use iteration, not recursion
      */
     public T get(int index) {
-        if (index <= 0) {
-            throw new IllegalArgumentException("Invalid index number");
-        } else if (index > size) {
-            throw new IllegalArgumentException("Index out of range");
+        if (index < 0 || index > size) {
+            return null;
         }
-        return items[index];
+
+        int currentPos = (first + index) % capacity;
+        return items[currentPos];
     }
 
     /**   */
@@ -135,6 +158,22 @@ public class ArrayDeque<T> {
 
     /**   */
     public boolean equals(Object o) {
+        if (!(o instanceof ArrayDeque)) {
+            return false;
+        }
+
+        ArrayDeque<T> otherObject = (ArrayDeque<T>) o;
+        if (otherObject == null) {
+            return false;
+        }
+        if (otherObject == this) {
+            return true;
+        }
+        if (otherObject.size() != this.size()) {
+            return false;
+        }
+
+        // TODO: Iterating all elements and compare
         return true;
     }
 }
