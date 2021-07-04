@@ -1,10 +1,8 @@
 package deque;
 
-import org.hamcrest.core.IsEqual;
-
 import java.util.Iterator;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T>{
 
     private Node<T> sentinel;
     private int size;
@@ -12,7 +10,7 @@ public class LinkedListDeque<T> {
     /** Deque implementation using linked list
      * Make it circular
      */
-    public class Node<T> {
+    private class Node<T> {
         public T data;
         public Node<T> next;
         public Node<T> prev;
@@ -22,7 +20,7 @@ public class LinkedListDeque<T> {
         }
     }
 
-    /** Constructor, creates an empty linked list deque*/
+    /* Constructor, creates an empty linked list deque */
     public LinkedListDeque() {
         sentinel = new Node<T>(null);  // Not sure for now...
         sentinel.next = sentinel;
@@ -30,20 +28,17 @@ public class LinkedListDeque<T> {
         size = 0;
     }
 
-    /** Check if the deque has items  */
-    public boolean isEmpty() {
-        return size > 0;
-    }
-
-    /** Should take constant time  */
+    /* Should take constant time */
+    @Override
     public int size() {
         return size;
     }
 
     /** Add item at the first of deque
-     * The add method should not use any looping or recursion: how ?
+     * The add method should not use any looping or recursion
      * such operation should take constant amount of time, not depend on size
      */
+    @Override
     public void addFirst(T data) {
         Node<T> newNode = new Node<T>(data);
         newNode.next = sentinel.next;
@@ -53,7 +48,8 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
-    /** Add item at the last of deque */
+    /* Add item at the last of deque */
+    @Override
     public void addLast(T data) {
         Node<T> newNode = new Node<T>(data);
         newNode.prev = sentinel.prev;
@@ -63,7 +59,8 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
-    /** Remove the item at the first of deque  */
+    /* Remove the item at the first of deque */
+    @Override
     public T removeFirst() {
         // If the deque is empty, return null
         if (isEmpty()) {
@@ -77,7 +74,8 @@ public class LinkedListDeque<T> {
         return del.data;
     }
 
-    /** Remove the item at the last of deque  */
+    /* Remove the item at the last of deque */
+    @Override
     public T removeLast() {
         // If the deque is empty, return null
         if (isEmpty()) {
@@ -90,7 +88,8 @@ public class LinkedListDeque<T> {
         return del.data;
     }
 
-    /** Print all items in deque  */
+    /* Print all items in deque */
+    @Override
     public void printDeque() {
         if (size == 0) {
             System.out.println();
@@ -99,19 +98,22 @@ public class LinkedListDeque<T> {
 
         // currentNode points at sentinel
         Node<T> currentNode = sentinel;
+        System.out.print("{");
 
         // Iterate over the queue
-        while (currentNode.next != sentinel) {
+        while (currentNode.next.next != sentinel) {
             currentNode = currentNode.next;
             System.out.print(currentNode.data + " ");
         }
-        System.out.print(currentNode.data);
+        currentNode = currentNode.next;
+        System.out.print(currentNode.data + "}");
         System.out.println();
     }
 
     /** Get the item at the specified index
      * Must use iteration, not recursion
      */
+    @Override
     public T get(int index) {
         if (index < 0 || index > size) {
             return null;
@@ -124,25 +126,21 @@ public class LinkedListDeque<T> {
         return currentNode.data;
     }
 
-    /** Same as get(), but use recursion */
-    public T getRecursive(int index) {
-        // TODO: Not sure how to do the recursion thing!
+    /* Same as get(), but use recursion */
+    public T getRecursive(int index, Node<T> node) {
         if (index < 0 || index > size) {
             return null;
         }
-
-        Node<T> currentNode = sentinel.next;
         if (index == 1) {
-            return currentNode.data;
+            return node.data;
         }
-        currentNode = currentNode.next;
-        return getRecursive(index - 1);
+        return getRecursive(index - 1, node.next);
     }
 
     /** Build the iterator class for linked list deque
      * Class method: hasNext(), next()
      */
-    private class LinkedListDequeIterator implements Iterator<T>{
+    private class LinkedListDequeIterator implements Iterator<T> {
         private int position;
         private Node<T> currentNode;
 
@@ -166,28 +164,26 @@ public class LinkedListDeque<T> {
         return new LinkedListDequeIterator();  // Why need a new keyword?
     }
 
+    /* Comparison using class method */
     @Override
-    /** Comparison using class method */
     public boolean equals(Object o) {
-        if (!(o instanceof LinkedListDeque)) {
+        if (o == null) {
             return false;
+        } else if (!(o instanceof LinkedListDeque)) {
+            return false;
+        } else if (o == this) {
+            return true;
         }
 
         // Casting
         LinkedListDeque<T> otherObject = (LinkedListDeque<T>) o;
-        if (otherObject == this) {
-            return true;
-        }
-        if (otherObject == null) {
-            return false;
-        }
-        if (otherObject.size() != this.size()) {
+        if (otherObject.size() != size()) {
             return false;
         }
 
         Iterator<T> iteratorOther = otherObject.iterator();
         Iterator<T> iteratorThis = iterator();
-        while(iteratorOther.hasNext() && iteratorThis.hasNext()) {
+        while (iteratorOther.hasNext() && iteratorThis.hasNext()) {
             if (iteratorOther.next() != iteratorThis.next()) {
                 return false;
             }

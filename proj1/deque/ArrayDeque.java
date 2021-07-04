@@ -2,9 +2,9 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
 
-    /** Deque implementation using array */
+    /* Deque implementation using array */
     private int capacity;
     private T[] items;
     private int first;
@@ -18,17 +18,29 @@ public class ArrayDeque<T> {
         size = 0;
     }
 
-    /** Check if the deque has items  */
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    /** Check if the deque is full  */
+    /* Check if the deque is full */
     public boolean isFull() {
         return size == capacity;
     }
 
-    /** Should take constant time  */
+    /* Resize method: should be very tricky */
+    public void resize(double scalingFactor) {
+        int newCapacity = (int) scalingFactor * capacity;
+        //int newCapacity = (int) 100+ capacity;
+        T[] newItems = (T[]) new Object[newCapacity];
+
+        // Looping the number of size times
+        for (int i = 0; i < size; i++) {
+            newItems[(first + i) % newCapacity] = items[(first + i) % capacity];
+        }
+
+        last = (first + size - 1) % newCapacity;
+        capacity = newCapacity;
+        items = newItems;
+    }
+
+    /* Should take constant time */
+    @Override
     public int size() {
         return size;
     }
@@ -37,9 +49,10 @@ public class ArrayDeque<T> {
      * The add method should not use any looping or recursion
      * such operation should take constant amount of time, not depend on size
      */
+    @Override
     public void addFirst(T item) {
         if (isFull()) {
-            resize();
+            resize(2);
         }
 
         if (isEmpty()) {
@@ -54,10 +67,11 @@ public class ArrayDeque<T> {
         size += 1;
     }
 
-    /** Add item at the last of deque */
+    /* Add item at the last of deque */
+    @Override
     public void addLast(T item) {
         if (isFull()) {
-            resize();
+            resize(2);
         }
 
         if (isEmpty()) {
@@ -72,10 +86,13 @@ public class ArrayDeque<T> {
         size += 1;
     }
 
-    /** Remove the item at the first of deque  */
+    /* Remove the item at the first of deque */
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
+        } else if ((size-1) < 0.25*capacity && capacity > 8) {
+            resize(0.5);
         }
 
         T delItem = items[first];
@@ -90,10 +107,13 @@ public class ArrayDeque<T> {
         return delItem;
     }
 
-    /** Remove the item at the last of deque  */
+    /* Remove the item at the last of deque */
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
+        } else if ((size-1) < 0.25*capacity && capacity > 8) {
+            resize(0.5);
         }
 
         T delItem = items[last];
@@ -108,23 +128,8 @@ public class ArrayDeque<T> {
         return delItem;
     }
 
-    /** Resize method: should be very tricky */
-    public void resize() {
-        int newCapacity = 2 * capacity;
-        T[] newItems = (T[]) new Object[newCapacity];
-
-        // Looping the number of size times
-        for (int i = 0; i < size; i++) {
-            newItems[(first + i) % newCapacity] = items[(first + i) % capacity];
-        }
-
-        last = (first + size - 1) % newCapacity;
-        capacity = newCapacity;
-        items = newItems;
-    }
-
-
-    /** Print all items in deque  */
+    /* Print all items in deque */
+    @Override
     public void printDeque() {
         int firstPos = first;
         int lastPos = last;
@@ -144,6 +149,7 @@ public class ArrayDeque<T> {
     /** Get the item at the specified index
      * Must use iteration, not recursion
      */
+    @Override
     public T get(int index) {
         if (index < 0 || index > size) {
             return null;
@@ -153,27 +159,53 @@ public class ArrayDeque<T> {
         return items[currentPos];
     }
 
-    /**   */
-    // public Iterator<T> iterator() {}
+    private Iterator<T> iterator() {
+        return new arrayDequeIterator();
+    }
 
-    /**   */
+    private class arrayDequeIterator implements Iterator<T> {
+        private int position;
+
+        public arrayDequeIterator() {
+            position = 0;
+        }
+
+        public boolean hasNext() {
+            return position < size;
+        }
+
+        public T next() {
+            T returnItem = items[(first+position) % capacity];
+            position += 1;
+            return returnItem;
+        }
+    }
+
+    /* Comparison using class method */
+    @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ArrayDeque)) {
+        if (o == null) {
             return false;
+        } else if (!(o instanceof ArrayDeque)) {
+            return false;
+        } else if (o == this) {
+            return true;
         }
 
         ArrayDeque<T> otherObject = (ArrayDeque<T>) o;
-        if (otherObject == null) {
-            return false;
-        }
-        if (otherObject == this) {
-            return true;
-        }
         if (otherObject.size() != this.size()) {
             return false;
         }
 
-        // TODO: Iterating all elements and compare
+        Iterator<T> otherObjectIter = otherObject.iterator();
+        Iterator<T> thisIter = iterator();
+        while (otherObjectIter.hasNext()) {
+            if (otherObjectIter.next() != thisIter.next()) {
+                return false;
+            }
+        }
+
+        // All tests passed, return true
         return true;
     }
 }
